@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Detector de Color Mejorado</title>
+  <style>
+    video, canvas { display: block; margin: auto; }
+    #colorInfo { text-align: center; font-size: 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <video id="video" width="400" autoplay></video>
+  <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+  <div id="colorInfo">Color: -</div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const colorInfo = document.getElementById('colorInfo');
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    });
+
+    // Paleta de 25 colores con nombre y valores RGB
+    const colorPalette = [
+      { name: "Rojo", r: 255, g: 0, b: 0 },
+      { name: "Verde", r: 0, g: 255, b: 0 },
+      { name: "Azul", r: 0, g: 0, b: 255 },
+      { name: "Amarillo", r: 255, g: 255, b: 0 },
+      { name: "Cian", r: 0, g: 255, b: 255 },
+      { name: "Magenta", r: 255, g: 0, b: 255 },
+      { name: "Naranja", r: 255, g: 165, b: 0 },
+      { name: "Rosado", r: 255, g: 192, b: 203 },
+      { name: "Lima", r: 191, g: 255, b: 0 },
+      { name: "Turquesa", r: 64, g: 224, b: 208 },
+      { name: "Lavanda", r: 230, g: 230, b: 250 },
+      { name: "Marrón", r: 139, g: 69, b: 19 },
+      { name: "Gris", r: 128, g: 128, b: 128 },
+      { name: "Negro", r: 0, g: 0, b: 0 },
+      { name: "Blanco", r: 255, g: 255, b: 255 },
+      { name: "Dorado", r: 255, g: 215, b: 0 },
+      { name: "Plateado", r: 192, g: 192, b: 192 },
+      { name: "Coral", r: 255, g: 127, b: 80 },
+      { name: "Salmón", r: 250, g: 128, b: 114 },
+      { name: "Azul Marino", r: 0, g: 0, b: 128 },
+      { name: "Verde Oliva", r: 128, g: 128, b: 0 },
+      { name: "Violeta", r: 148, g: 0, b: 211 },
+      { name: "Azul Cielo", r: 135, g: 206, b: 235 },
+      { name: "Beige", r: 245, g: 245, b: 220 },
+      { name: "Chocolate", r: 210, g: 105, b: 30 }
+    ];
+
+    function getClosestColorName(r, g, b) {
+      let minDist = Infinity;
+      let closestColor = "Desconocido";
+
+      for (const color of colorPalette) {
+        const dist = Math.sqrt(
+          (r - color.r) ** 2 +
+          (g - color.g) ** 2 +
+          (b - color.b) ** 2
+        );
+        if (dist < minDist) {
+          minDist = dist;
+          closestColor = color.name;
+        }
+      }
+
+      return closestColor;
+    }
+
+    setInterval(() => {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const pixel = ctx.getImageData(cx, cy, 1, 1).data;
+      const [r, g, b] = pixel;
+      const colorName = getClosestColorName(r, g, b);
+      colorInfo.textContent = `Color: ${colorName} (R:${r} G:${g} B:${b})`;
+    }, 300);
+  </script>
+</body>
+</html>
